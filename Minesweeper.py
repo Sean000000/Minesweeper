@@ -2,143 +2,203 @@ import random
 
 class Minesweeper:
     '''
-    Class: Minesweeper
+    Class Minesweeper
+        Description:
+        The class for minesweeper game.
     '''
-
-    def reset(self):
+    def __init__(self):
         '''
-        Method: reset()
-
+        Constructor()
+        Description:
+            Constructor for class Minesweeper.
+        Parameters:
+            None.
         '''
-        # Create game map. (self.map[y][x] = {value,visible})
-        self.map = [[{'value':0,'visible':False} for x in range(self.x)] for y in range(self.y)]
+        self.newGame(10, 10, 10)
 
-        # Set random mines map.
-        mine_list = random.sample(range(self.x*self.y), self.mine_count)
-        mine_list = [0,11,22,33,44,55,66,77,88,99]
-        for mine in mine_list:
-            self.map[mine//self.x][mine%self.x]['value'] = 9
-
-        # Set mine hint.
-        for y in range(self.y):
-            for x in range(self.x):
-                if self.map[y][x]['value'] == 9:
-                    #
-                    continue
-                else:
-                    #
-                    mines = 0
-
-                    # Check Left-Top
-                    if x>0 and y>0 and self.map[y-1][x-1]['value']==9:
-                        mines += 1
-                    # Check Top
-                    if y>0 and self.map[y-1][x]['value']==9:
-                        mines += 1
-                    # Check Right-Top
-                    if x<(self.x-1) and y>0 and self.map[y-1][x+1]['value']==9:
-                        mines += 1
-                    # Check Left
-                    if x>0 and self.map[y][x-1]['value']==9:
-                        mines += 1
-                    # Check Right
-                    if x<(self.x-1) and self.map[y][x+1]['value']==9:
-                        mines += 1
-                    # Check Left-Down
-                    if x>0 and y<(self.y-1) and self.map[y+1][x-1]['value']==9:
-                        mines += 1
-                    # Check Down
-                    if y<(self.y-1) and self.map[y+1][x]['value']==9:
-                        mines += 1
-                    # Check Right-Down
-                    if x<(self.x-1) and y<(self.y-1) and self.map[y+1][x+1]['value']==9:
-                        mines += 1
-
-                    #
-                    self.map[y][x]['value'] = mines
-        #
-        self.game_over = False
-
-    def sweep(self, x, y):
+    class Node:
         '''
-        Method: sweep(x, y)
+        Class Node
+        Description:
+            Inner class for map node.
         '''
-        #
-        if self.map[y][x]['visible'] == True:
-            return
-        self.map[y][x]['visible'] = True
+        def __init__(self, visible, value, flag):
+            '''
+            Constructor(visible, value, flag)
+            Description:
+                Constructor for class Node.
+            Parameters:
+                visible -
+                value -
+                flag -
+            '''
+            self.visible = visible
+            self.value = value
+            self.flag = flag
+        def setVisible(self, state):
+            '''
+            setVisible(state)
+            Description:
+                Setter for visible.
+            Parameters:
+                state -
+            '''
+            self.visible = state
+        def getVisible(self):
+            '''
+            getVisible()
+            Description:
+                Getter for visible.
+            Parameters:
+                None.
+            '''
+            return self.visible
+        def setValue(self, value):
+            '''
+            setValue(state)
+            Description:
+                Setter for value.
+            Parameters:
+                value -
+            '''
+            self.value = value
+        def getValue(self):
+            '''
+            getValue()
+            Description:
+                Getter for value.
+            Parameters:
+                None.
+            '''
+            return self.value
+        def setFlag(self, state):
+            '''
+            setFlag(state)
+            Description:
+                Setter for flag.
+            Parameters:
+                state -
+            '''
+            self.flag = state
+        def getFlag(self):
+            '''
+            getFlag()
+            Description:
+                Getter for flag.
+            Parameters:
+                None.
+            '''
+            return self.flag
 
-        #
-        if self.map[y][x]['value'] == 9:
-            self.game_over = True
-            return
-
-        if self.map[y][x]['value'] == 0:
-            # Check Left-Top
-            if x>0 and y>0:
-                self.sweep(x-1, y-1)
-            # Check Top
-            if y>0:
-                self.sweep(x, y-1)
-            # Check Right-Top
-            if x<(self.x-1) and y>0:
-                self.sweep(x+1, y-1)
-            # Check Left
-            if x>0:
-                self.sweep(x-1, y)
-            # Check Right
-            if x<(self.x-1):
-                self.sweep(x+1, y)
-            # Check Left-Down
-            if x>0 and y<(self.y-1):
-                self.sweep(x-1, y+1)
-            # Check Down
-            if y<(self.y-1):
-                self.sweep(x, y+1)
-            # Check Right-Down
-            if x<(self.x-1) and y<(self.y-1):
-                self.sweep(x+1, y+1)
-        
-    def __init__(self, x, y, mine_count):
+    def newGame(self, size_x, size_y, mine_number):
         '''
-        Method: __init__(x, y, mine_count)
+        newGame(size_x, size_y, mine_number)
+        Description:
+            Start a new game.
+        Parameters:
+            size_x -
+            size_y -
+            mine_number -
         '''
         # Get game setting.
-        self.x = x
-        self.y = y
-        self.mine_count = mine_count
-        # Reset game.
-        self.reset()
+        self.size_x = size_x
+        self.size_y = size_y
+        self.mine_number = mine_number
 
-    def printValue(self):
-        '''
-        Method: printValue()
-        '''
-        for list_on_map in self.map:
-            for dict_on_list in list_on_map:
-                print(dict_on_list['value'], ' ', end='')
-            print()
+        # Create game map.
+        self.map = [[self.Node(visible=False,value=0,flag=False) for x in range(self.size_x)] for y in range(self.size_y)]
 
-    def printVisible(self):
+        # Put mines to random axis on the map.
+        random_list = random.sample(range(self.size_x*self.size_y), self.mine_number)
+        random_list = [0,9,11,18,22,27,33,36,44,45]  # Just for test...
+
+        for random_number in random_list:
+            x = random_number %  self.size_x
+            y = random_number // self.size_x
+            self.map[y][x].setValue(9)    # The number 9 means mine.
+
+        # Mark mines count on the map.
+        for y in range(self.size_y):
+            for x in range(self.size_x):
+                if self.map[y][x].getValue() == 9:
+                    continue
+                else:
+                    # To count around mines.
+                    # Warning: This part used short-circuit evaluation, so the getValue()
+                    #          should be execute on the last.
+                    around_mines = 0
+                    if y>0 and x>0 and self.map[y-1][x-1].getValue()==9:                                # Left-Top...
+                        around_mines += 1
+                    if y>0 and self.map[y-1][x].getValue()==9:                                          # Top...
+                        around_mines += 1
+                    if y>0 and x<(self.size_x-1) and self.map[y-1][x+1].getValue()==9:                  # Right-Top...
+                        around_mines += 1
+                    if x>0 and self.map[y][x-1].getValue()==9:                                          # Left...
+                        around_mines += 1
+                    if x<(self.size_x-1) and self.map[y][x+1].getValue()==9:                            # Right...
+                        around_mines += 1
+                    if y<(self.size_y-1) and x>0 and self.map[y+1][x-1].getValue()==9:                  # Left-Down...
+                        around_mines += 1
+                    if y<(self.size_y-1) and self.map[y+1][x].getValue()==9:                            # Down...
+                        around_mines += 1
+                    if y<(self.size_y-1) and x<(self.size_x-1) and self.map[y+1][x+1].getValue()==9:    # Right-Down...
+                        around_mines += 1
+                    self.map[y][x].setValue(around_mines)                                               # Write-back to the node.
+
+    def open(self, x, y):
         '''
-        Method: printVisible()
+        open(x, y)
+        Description:
+            Open a node on the map.
+        Parameters:
+            x -
+            y -
         '''
-        for list_on_map in self.map:
-            for dict_on_list in list_on_map:
-                print(dict_on_list['visible'], ' ', end='')
-            print()
+        # Let the node to visible.
+        if self.map[y][x].getVisible() == True:
+            return
+        self.map[y][x].setVisible(True)
+
+        # Open around node when value is 0.
+        if self.map[y][x].getValue() == 0:
+            if y > 0:                   # Top...
+                self.open(x, y-1)
+            if x > 0:                   # Left...
+                self.open(x-1, y)
+            if x < (self.size_x-1):     # Right...
+                self.open(x+1, y)
+            if y < (self.size_y-1):     # Down...
+                self.open(x, y+1)
+
+    def flag(self, x, y, state):
+        '''
+        flag(x, y, state)
+        Description:
+            Set node as flag.
+        Parameters:
+            x -
+            y -
+            state -
+        '''
+        self.map[y][x].setFlag(state)
 
     def getMap(self):
         '''
-        Method: getMap()
+        getMap()
+        Description:
+            Get last game map.
+        Parameters:
+            None.
         '''
-        new_map = list()
-        for list_on_map in self.map:
-            new_list = list()
-            for dict_on_list in list_on_map:
-                if dict_on_list['visible'] == False:
-                    new_list.append(None)
+        game_map = list()
+        for y in range(self.size_y):
+            map_row = list()
+            for x in range(self.size_x):
+                if self.map[y][x].getVisible() == False:
+                    map_row.append('unknown')
+                elif self.map[y][x].getFlag() == True:
+                    map_row.append('flag')
                 else:
-                    new_list.append(dict_on_list['value'])
-            new_map.append(new_list)
-        return new_map
+                    map_row.append(self.map[y][x].getValue())
+            game_map.append(map_row)
+        return game_map
