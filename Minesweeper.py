@@ -1,4 +1,5 @@
 import random
+import os
 
 class Minesweeper:
     '''
@@ -110,8 +111,7 @@ class Minesweeper:
 
         # Put mines to random axis on the map.
         random_list = random.sample(range(self.size_x*self.size_y), self.mine_number)
-        random_list = [0,9,11,18,22,27,33,36,44,45]  # Just for test...
-
+       #random_list = [0,9,11,18,22,27,33,36,44,45]  # Just for test...
         for random_number in random_list:
             x = random_number %  self.size_x
             y = random_number // self.size_x
@@ -155,7 +155,7 @@ class Minesweeper:
             y -
         '''
         # Let the node to visible.
-        if self.map[y][x].getVisible() == True:
+        if self.map[y][x].getVisible()==True or self.map[y][x].getFlag()==True:
             return
         self.map[y][x].setVisible(True)
 
@@ -170,7 +170,7 @@ class Minesweeper:
             if y < (self.size_y-1):     # Down...
                 self.open(x, y+1)
 
-    def flag(self, x, y, state):
+    def flag(self, x, y):
         '''
         flag(x, y, state)
         Description:
@@ -180,7 +180,9 @@ class Minesweeper:
             y -
             state -
         '''
-        self.map[y][x].setFlag(state)
+        if self.map[y][x].getVisible() == False:
+            self.map[y][x].setFlag(not self.map[y][x].getFlag())
+            print('(', x, ',', y, ').flag=', self.map[y][x].getFlag(), sep='')
 
     def getMap(self):
         '''
@@ -190,15 +192,17 @@ class Minesweeper:
         Parameters:
             None.
         '''
-        game_map = list()
-        for y in range(self.size_y):
-            map_row = list()
-            for x in range(self.size_x):
-                if self.map[y][x].getVisible() == False:
-                    map_row.append('unknown')
-                elif self.map[y][x].getFlag() == True:
-                    map_row.append('flag')
+        output_map = list()
+        for map_row in self.map:
+            output_map_row = list()
+            for node in map_row:
+                if node.getVisible() == False:
+                    if node.getFlag() == True:
+                        output_map_row.append('flag')
+                    else:
+                        output_map_row.append('unknown')
                 else:
-                    map_row.append(self.map[y][x].getValue())
-            game_map.append(map_row)
-        return game_map
+                    output_map_row.append(node.getValue())
+            output_map.append(output_map_row)
+            print(output_map_row)
+        return output_map
